@@ -1,0 +1,40 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Validacao Grenais
+      id: validacao-grenais
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Validacao Grenais
+        setup-command: pip install -r requirements.txt
+        command: bash tests/grenais_test.sh
+        input: ''
+        expected-output: |-
+          Novo grenal (1-sim 2-nao)
+          Novo grenal (1-sim 2-nao)
+          Novo grenal (1-sim 2-nao)
+          3 grenais
+          Inter:2
+          Gremio:1
+          Empates:0
+          Inter venceu mais
+        comparison-method: exact
+        timeout: 2
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        VALIDACAO-GRENAIS_RESULTS: "${{steps.validacao-grenais.outputs.result}}"
+      with:
+        runners: validacao-grenais
